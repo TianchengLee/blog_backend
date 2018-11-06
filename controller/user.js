@@ -2,12 +2,6 @@ const moment = require('moment')
 const conn = require('../db/db.js')
 
 module.exports = {
-  handleRegisterGet(req, res) {
-    res.render('./user/register.ejs', {})
-  },
-  handleLoginGet(req, res) {
-    res.render('./user/login.ejs', {})
-  },
   handleRegisterPost(req, res) {
     // body-parser
     // console.log(req.body)
@@ -56,12 +50,5 @@ module.exports = {
       req.session.cookie.expires = new Date(Date.now() + hour)
       res.send({ status: 200, msg: '恭喜您!登录成功!' })
     })
-  },
-  handleLogoutGet(req, res) {
-    req.session.destroy(err => { // express-session的方法
-      // 该回调函数执行表示销毁成功
-      res.redirect('/') // express的方法
-    })
   }
-  // 约定大于规则
 }

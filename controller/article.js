@@ -1,12 +1,31 @@
 const moment = require('moment')
 const conn = require('../db/db.js')
 module.exports = {
-  handleArticleAddGet(req, res) {
-    // 判断用户的登录状态 处理登录拦截
-    if (!req.session.isLogin) return res.redirect('/')
-    res.render('./articles/add.ejs', {
-      user: req.session.user,
-      isLogin: req.session.isLogin
+  handleGetArticles(req, res) {
+    if (!req.query.hasOwnProperty('page') || !req.query.hasOwnProperty('pageSize')) return res.status(400).send({ status: 400, msg: '参数错误, 必须传入page和pageSize' })
+    let page = req.query.page
+    let pageSize = req.query.pageSize
+    let title = req.query.title || ''
+    let content = req.query.content || ''
+    let username = req.query.username || ''
+    let nickname = req.query.nickname || ''
+
+    console.log(req.query)
+
+    const queryArticlesSql = `select a.id as aid, a.title, a.content, a.ctime, u.id as uid, u.username, u.nickname from articles as a
+    left join users as u
+    on a.author_id = u.id
+    where a.title like '%${title}%'
+    or a.content like '%${content}%'
+    or u.username like '%${username}%'
+    or u.nickname like '%${nickname}%'
+    order by aid desc
+    limit ${page}, ${pageSize}`
+
+    console.log(queryArticlesSql)
+    conn.query(queryArticlesSql, (err, result) => {
+      if (err) return res.status(500).send({status: 500, msg: '数据获取失败, 请重试!', data: null})
+      res.send({ status: 200, msg: 'ok', data: result });
     })
   },
   handleArticleAddPost(req, res) {
@@ -21,9 +40,6 @@ module.exports = {
     })
   },
   handleArticleInfoGet(req, res) {
-    res.render('./articles/info.ejs', {
-      user: req.session.user,
-      isLogin: req.session.isLogin
-    })
+
   }
 }
